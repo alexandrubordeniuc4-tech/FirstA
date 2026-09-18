@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pentru Tine...</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        cursive: ['"Great Vibes"', 'cursive'],
+                    },
+                    colors: {
+                        sky: {
+                            dark: '#0a0514',
+                            mid: '#1a0b2e',
+                            light: '#2a0813'
+                        },
+                        rose: {
+                            deep: '#5c0a18',
+                            red: '#8b1c31',
+                            light: '#fdf6e3', 
+                        },
+                        gold: {
+                            light: '#fbf0c9',
+                            main: '#d4af37',
+                            dark: '#aa8c2c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            background: linear-gradient(180deg, #0a0514 0%, #1a0b2e 50%, #2a0813 100%);
+            touch-action: none; 
+            -webkit-tap-highlight-color: transparent;
+            color: #fdf6e3;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1.2s ease, visibility 1.2s ease, transform 1.2s ease;
+            z-index: 10;
+        }
+        
+        .screen-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+        
+        .screen-active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        #stars-container, #petals-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none !important; /* CRITICAL: Must not block clicks */
+        }
+        
+        #stars-container { z-index: 1; }
+        #petals-container { z-index: 2; overflow: hidden; }
+
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle infinite alternate;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.1; transform: scale(0.8); }
+            100% { opacity: 0.9; transform: scale(1.2) drop-shadow(0 0 3px rgba(255,255,255,0.8)); }
+        }
+
+        .petal {
+            position: absolute;
+            top: -10%;
+            animation: fall linear forwards;
+            opacity: 0.85;
+            filter: drop-shadow(0px 5px 5px rgba(0,0,0,0.5));
+            pointer-events: none !important;
+        }
+        @keyframes fall {
+            0% { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            100% { transform: translate3d(var(--x-end), 110vh, 0) rotateX(var(--rx)) rotateY(var(--ry)) rotateZ(var(--rz)); }
+        }
+
+        .tap-sparkle {
+            position: fixed;
+            pointer-events: none !important;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            animation: sparkle-burst 0.7s ease-out forwards;
+        }
+        @keyframes sparkle-burst {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
+            50% { opacity: 1; }
+            100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.5) rotate(90deg); opacity: 0; }
+        }
+
+        .shake { animation: shake-anim 0.4s ease-in-out; }
+        @keyframes shake-anim {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+        
+        .pulse-slow { animation: pulse-slow-anim 2.5s infinite ease-in-out alternate; }
+        @keyframes pulse-slow-anim {
+            0% { opacity: 0.4; } 100% { opacity: 1; text-shadow: 0 0 10px rgba(212,175,55,0.5); }
+        }
+
+        #lock-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .elegant-input {
+            width: 100%;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-radius: 30px;
+            padding: 16px 20px;
+            color: #fbf0c9;
+            font-family: "Great Vibes", cursive;
+            font-size: 28px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s, background 0.3s;
+            margin-bottom: 24px;
+            -webkit-appearance: none;
+        }
+        .elegant-input::placeholder { color: rgba(212, 175, 55, 0.4); }
+        .elegant-input:focus { border-color: #d4af37; background: rgba(255, 255, 255, 0.15); }
+        
+        .elegant-button {
+            width: 100%;
+            box-sizing: border-box;
+            background: linear-gradient(90deg, #aa8c2c, #d4af37, #aa8c2c);
+            color: #0a0514;
+            border: none;
+            border-radius: 30px;
+            padding: 18px 24px;
+            font-family: "Playfair Display", serif;
+            font-weight: 700;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            transition: opacity 0.3s, transform 0.2s;
+            touch-action: manipulation;
+            -webkit-appearance: none;
+            z-index: 101; /* CRITICAL */
+        }
+        .elegant-button:active { transform: scale(0.96); opacity: 0.9; }
+
+        /* Envelope */
+        .envelope-wrapper {
+            position: relative; 
+            width: 90vw; max-width: 320px; height: 220px;
+            cursor: pointer; transition: transform 0.3s ease;
+            touch-action: manipulation; z-index: 50;
+        }
+        .envelope-wrapper:hover { transform: scale(1.03); }
+        .env-back { position: absolute; inset: 0; background: #3d0714; border-radius: 6px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .env-card-preview { position: absolute; bottom: 5px; left: 10px; right: 10px; height: 200px; background: #fdf6e3; border-radius: 8px; border: 1px solid #d4af37; transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s; z-index: 2; }
+        .env-flaps { position: absolute; inset: 0; z-index: 3; pointer-events: none; border-left: calc(min(45vw, 160px)) solid #2a040d; border-right: calc(min(45vw, 160px)) solid #2a040d; border-bottom: 110px solid #4a0918; border-top: 110px solid transparent; border-radius: 6px; }
+        .env-top-flap { position: absolute; top: 0; left: 0; width: 0; height: 0; border-left: calc(min(45vw, 160px)) solid transparent; border-right: calc(min(45vw, 160px)) solid transparent; border-top: 130px solid #5c0a18; transform-origin: top; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.35s; z-index: 5; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.4)); }
+        .wax-seal { position: absolute; top: 115px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; background: radial-gradient(circle, #8b1c31 20%, #4a0918 90%); border-radius: 50%; z-index: 6; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease; border: 2px solid #3d0714; }
+        .envelope-wrapper.is-open .env-top-flap { transform: rotateX(180deg); z-index: 1; filter: none; }
+        .envelope-wrapper.is-open .wax-seal { opacity: 0; transition: opacity 0.1s; }
+        .envelope-wrapper.is-open .env-card-preview { transform: translateY(-100px); }
+
+        /* The Letter / Parchment */
+        .parchment {
+            background: linear-gradient(135deg, rgba(253,246,227,0.95), rgba(245,235,210,0.95));
+            border: 1px solid rgba(212,175,55,0.4);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 0 40px rgba(212,175,55,0.1);
+            color: #2a0813;
+        }
+        
+        /* Scratch Card */
+        .scratch-wrapper {
+            position: relative; width: 90%; max-width: 320px; height: 160px;
+            margin: 0 auto; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 2px solid rgba(212,175,55,0.6); background: #fdf6e3;
+            z-index: 50;
+        }
+        #scratch-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2; 
+            touch-action: none;
+            cursor: crosshair;
+        }
+        .scratch-content {
+            position: absolute; inset: 0; z-index: 1;
+            display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Backgrounds -->
+    <div id="stars-container"></div>
+    <div id="petals-container"></div>
+
+    <!-- Screen 1: Lock Screen -->
+    <div id="screen-lock" class="screen screen-active z-50">
+        <div class="absolute inset-0 bg-sky-dark/40 backdrop-blur-sm z-0 pointer-events-none"></div>
+        
+        <!-- form tag removed to prevent any accidental page reloads in WebView -->
+        <div id="lock-form" class="px-6 w-full">
+            <div class="mb-8 opacity-90 drop-shadow-lg text-gold-main flex justify-center">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            
+            <input 
+                type="text" 
+                id="password-input" 
+                placeholder="Parola..." 
+                class="elegant-input"
+                autocomplete="off" 
+                spellcheck="false"
+                inputmode="text"
+            >
+            
+            <button 
+                id="btn-unlock" 
+                class="elegant-button">
+                Deblochează
+            </button>
+            
+            <div class="mt-8 text-center text-gold-light/70 font-serif text-[13px] tracking-wide leading-relaxed drop-shadow-md">
+                <span class="block text-gold-main italic mb-1 text-sm">Indiciu:</span> 
+                Cel mai frumos nume de fată din lume.
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 2: Envelope -->
+    <div id="screen-envelope" class="screen screen-hidden z-40">
+        <div class="text-center mb-10 px-6 mt-[-10vh]">
+            <h1 class="text-4xl md:text-5xl text-gold-main font-cursive tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Pentru cea mai frumoasă...</h1>
+        </div>
+
+        <div class="envelope-wrapper" id="envelope">
+            <div class="env-back"></div>
+            <div class="env-card-preview"></div>
+            <div class="env-flaps"></div>
+            <div class="env-top-flap"></div>
+            <div class="wax-seal">
+                <span class="font-cursive text-gold-light text-2xl">A</span>
+            </div>
+        </div>
+        
+        <p class="mt-12 text-gold-light/70 font-serif text-[10px] md:text-xs tracking-[0.25em] uppercase pulse-slow">
+            Atinge sigiliul pentru a deschide
+        </p>
+    </div>
+
+    <!-- Screen 3: The Letter -->
+    <div id="screen-letter" class="screen screen-hidden z-30">
+        <div id="poem-tap-area" class="absolute inset-0 z-0"></div>
+        
+        <div class="parchment w-[90%] md:max-w-[420px] max-h-[85vh] rounded-xl p-6 md:p-8 flex flex-col items-center relative z-10 overflow-y-auto">
+            
+            <div class="absolute top-4 left-4 text-gold-main/40"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h4v4H4zM4 16h4v4H4zM16 4h4v4h-4zM16 16h4v4h-4z"/></svg></div>
+            <div class="absolute top-4 right-4 text-gold-main/40"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h4v4H4zM4 16h4v4H4zM16 4h4v4h-4zM16 16h4v4h-4z"/></svg></div>
+            
+            <h2 class="font-serif italic text-xl md:text-2xl text-rose-deep mb-6 border-b border-gold-main/30 pb-4 text-center w-full">
+                Pentru cea mai frumoasă fată,
+            </h2>
+            
+            <p id="poem-hint" class="font-sans text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-rose-deep/50 pulse-slow mb-4 text-center transition-opacity duration-500">
+                (Atinge ecranul pentru a citi...)
+            </p>
+
+            <div id="poem-container" class="w-full flex flex-col gap-4 md:gap-6 text-center font-cursive text-2xl md:text-3xl leading-relaxed text-rose-deep drop-shadow-sm px-1 mb-8">
+                <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none">
+                    [Aici vei scrie primul vers al poeziei tale,]
+                </p>
+                <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none">
+                    [Aici vine al doilea vers, plin de emoție,]
+                </p>
+                <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none">
+                    [Al treilea vers, direct din suflet,]
+                </p>
+                <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none">
+                    [Și ultimul vers, perfect pentru ea.]
+                </p>
+            </div>
+
+            <button 
+                id="btn-secret"
+                class="opacity-0 pointer-events-none transition-all duration-1000 ease-in mt-auto px-6 py-3 bg-rose-deep text-gold-light rounded-full font-serif text-[12px] md:text-sm tracking-wider shadow-lg border border-gold-main/50 hover:bg-rose-red z-20 touch-manipulation">
+                Mai am un secret pentru tine...
+            </button>
+        </div>
+    </div>
+
+    <!-- Screen 4: The Secret Scratch-off -->
+    <div id="screen-secret" class="screen screen-hidden z-20">
+        <div class="text-center mb-6 px-4">
+            <div class="text-gold-main mb-4 flex justify-center">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+            </div>
+            <p class="font-serif text-[12px] md:text-sm text-gold-light/80 tracking-[0.2em] uppercase pulse-slow">Șterge cu degetul...</p>
+        </div>
+
+        <div class="scratch-wrapper">
+            <div class="scratch-content">
+                <span class="font-cursive text-2xl md:text-3xl text-rose-deep leading-tight px-2 drop-shadow-sm">
+                    P.S. Arăți absolut superb în seara asta. ✨
+                </span>
+            </div>
+            <canvas id="scratch-canvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // 1. Stars
+        function initStars() {
+            const container = document.getElementById('stars-container');
+            const count = Math.floor(window.innerWidth / 12); 
+            for(let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.width = `${Math.random() * 2 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(star);
+            }
+        }
+
+        // 2. Rose Petals
+        const petalSVG = `
+            <svg viewBox="0 0 24 24" fill="#7a1023" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12,2C8,2,4,6,4,12c0,4.5,3.5,8,8,10c4.5-2,8-5.5,8-10C20,6,16,2,12,2z" opacity="0.9"/>
+                <path d="M12,4c-3,0-5.5,2.5-6.5,6c1.5-2,4-3,6.5-3s5,1,6.5,3C17.5,6.5,15,4,12,4z" fill="#9e1832" opacity="0.7"/>
+            </svg>
+        `;
+
+        function spawnPetal() {
+            const container = document.getElementById('petals-container');
+            const petal = document.createElement('div');
+            petal.classList.add('petal');
+            
+            const size = Math.random() * 12 + 15;
+            const startX = Math.random() * 100;
+            const endX = (Math.random() - 0.5) * 150 + 'px'; 
+            const duration = Math.random() * 8 + 7; 
+            
+            const rx = Math.random() * 360 + 360 + 'deg';
+            const ry = Math.random() * 360 + 360 + 'deg';
+            const rz = Math.random() * 360 + 'deg';
+
+            petal.style.width = `${size}px`;
+            petal.style.height = `${size}px`;
+            petal.style.left = `${startX}%`;
+            petal.style.setProperty('--x-end', endX);
+            petal.style.setProperty('--rx', rx);
+            petal.style.setProperty('--ry', ry);
+            petal.style.setProperty('--rz', rz);
+            petal.style.animationDuration = `${duration}s`;
+            
+            petal.innerHTML = petalSVG;
+            container.appendChild(petal);
+
+            setTimeout(() => petal.remove(), duration * 1000);
+        }
+
+        function startPetalRain() {
+            for(let i=0; i<4; i++) setTimeout(spawnPetal, Math.random() * 3000);
+            setInterval(spawnPetal, 2000);
+        }
+
+        // Global Tap Sparkles - Make sure it doesn't intercept buttons
+        document.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('button, input, canvas, .envelope-wrapper, #btn-unlock')) return;
+
+            for(let i=0; i<3; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('tap-sparkle');
+                
+                const isHeart = Math.random() > 0.5;
+                sparkle.innerHTML = isHeart 
+                    ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="#d4af37"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`
+                    : `<span style="color:#fbf0c9; font-size:12px; filter:drop-shadow(0 0 2px #d4af37);">✨</span>`;
+                
+                sparkle.style.left = `${e.clientX}px`;
+                sparkle.style.top = `${e.clientY}px`;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 35 + 15;
+                sparkle.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+                sparkle.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+                
+                document.body.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 700);
+            }
+        });
+
+        const screens = {
+            'screen-lock': document.getElementById('screen-lock'),
+            'screen-envelope': document.getElementById('screen-envelope'),
+            'screen-letter': document.getElementById('screen-letter'),
+            'screen-secret': document.getElementById('screen-secret')
+        };
+
+        function switchScreen(fromId, toId) {
+            screens[fromId].classList.remove('screen-active');
+            screens[fromId].classList.add('screen-hidden');
+            setTimeout(() => {
+                screens[toId].classList.remove('screen-hidden');
+                screens[toId].classList.add('screen-active');
+            }, 1000);
+        }
+
+        const unlockBtn = document.getElementById('btn-unlock');
+        const passInput = document.getElementById('password-input');
+        
+        function handleUnlock(e) {
+            if (e) e.preventDefault(); // Stop any default behavior in WebView
+            
+            const val = passInput.value.trim().toLowerCase();
+            if (val === 'ariadna') {
+                passInput.blur();
+                switchScreen('screen-lock', 'screen-envelope');
+            } else {
+                const form = document.getElementById('lock-form');
+                form.classList.remove('shake');
+                void form.offsetWidth; // trigger reflow
+                form.classList.add('shake');
+            }
+        }
+        
+        // Robust event binding for Telegram WebView
+        unlockBtn.addEventListener('touchend', (e) => {
+            e.preventDefault(); // Prevents ghost clicks
+            handleUnlock(e);
+        });
+        unlockBtn.addEventListener('click', handleUnlock);
+        
+        passInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleUnlock(e);
+            }
+        });
+
+        const envelopeEl = document.getElementById('envelope');
+        let envelopeOpened = false;
+        
+        envelopeEl.addEventListener('click', () => {
+            if (envelopeOpened) return;
+            envelopeOpened = true;
+            envelopeEl.classList.add('is-open');
+            setTimeout(() => {
+                switchScreen('screen-envelope', 'screen-letter');
+            }, 1500);
+        });
+
+        const poemLines = document.querySelectorAll('.poem-line');
+        const btnSecret = document.getElementById('btn-secret');
+        const poemHint = document.getElementById('poem-hint');
+        let currentLine = 0;
+
+        document.getElementById('poem-tap-area').addEventListener('pointerdown', (e) => {
+            if (currentLine === 0) {
+                poemHint.style.opacity = '0';
+            }
+            if (currentLine < poemLines.length) {
+                poemLines[currentLine].classList.remove('opacity-0', 'translate-y-2');
+                poemLines[currentLine].classList.add('opacity-100', 'translate-y-0');
+                currentLine++;
+                
+                if (currentLine === poemLines.length) {
+                    setTimeout(() => {
+                        btnSecret.classList.remove('opacity-0', 'pointer-events-none');
+                        btnSecret.classList.add('opacity-100', 'pointer-events-auto');
+                    }, 800);
+                }
+            }
+        });
+
+        btnSecret.addEventListener('click', () => {
+            switchScreen('screen-letter', 'screen-secret');
+            setTimeout(initScratchCard, 1200);
+        });
+
+        function initScratchCard() {
+            const container = document.querySelector('.scratch-wrapper');
+            const canvas = document.getElementById('scratch-canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#aa8c2c');
+            gradient.addColorStop(0.5, '#fbf0c9');
+            gradient.addColorStop(1, '#d4af37');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < 400; i++) {
+                ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.1)';
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 1, 1);
+            }
+
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 40; 
+            ctx.globalCompositeOperation = 'destination-out';
+
+            let isDrawing = false;
+
+            function getCoords(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                return { 
+                    x: (clientX - rect.left) * scaleX, 
+                    y: (clientY - rect.top) * scaleY 
+                };
+            }
+
+            function startDraw(e) {
+                isDrawing = true;
+                const c = getCoords(e);
+                ctx.beginPath();
+                ctx.moveTo(c.x, c.y);
+            }
+
+            function scratch(e) {
+                if (!isDrawing) return;
+                if (e.cancelable) e.preventDefault(); 
+                const coords = getCoords(e);
+                ctx.lineTo(coords.x, coords.y);
+                ctx.stroke();
+            }
+
+            function stopDraw() {
+                isDrawing = false;
+            }
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', scratch);
+            window.addEventListener('mouseup', stopDraw);
+
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', scratch, { passive: false });
+            window.addEventListener('touchend', stopDraw);
+            window.addEventListener('touchcancel', stopDraw);
+        }
+
+        window.onload = () => {
+            initStars();
+            startPetalRain();
+        };
+    </script>
+</body>
+</html>
