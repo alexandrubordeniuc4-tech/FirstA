@@ -2,8 +2,7 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <!-- CRITICAL for mobile/Telegram: prevents zoom and scrolling bugs -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pentru Tine...</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,21 +19,9 @@
                         cursive: ['"Great Vibes"', 'cursive'],
                     },
                     colors: {
-                        night: {
-                            deep: '#0b001a',
-                            mid: '#1a0033',
-                            light: '#2a004d'
-                        },
-                        rose: {
-                            deep: '#5c0a18',
-                            red: '#8b1c31',
-                            light: '#fdf6e3', 
-                        },
-                        gold: {
-                            light: '#fbf0c9',
-                            main: '#d4af37',
-                            dark: '#aa8c2c',
-                        }
+                        sky: { dark: '#0a0514', mid: '#1a0b2e', light: '#2a0813' },
+                        rose: { deep: '#5c0a18', red: '#8b1c31', light: '#fdf6e3' },
+                        gold: { light: '#fbf0c9', main: '#d4af37', dark: '#aa8c2c' }
                     }
                 }
             }
@@ -46,9 +33,9 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100dvh;
+            height: 100%; /* Улучшено для мобильных браузеров */
             overflow: hidden;
-            background: linear-gradient(180deg, #0b001a 0%, #1a0033 50%, #2a004d 100%);
+            background: linear-gradient(180deg, #0a0514 0%, #1a0b2e 50%, #2a0813 100%);
             touch-action: none; 
             -webkit-tap-highlight-color: transparent;
             color: #fdf6e3;
@@ -56,7 +43,10 @@
 
         .screen {
             position: absolute;
-            inset: 0;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -79,14 +69,15 @@
             transform: scale(1);
         }
 
-        /* Ambient effects */
-        #stars-container, #petals-container {
+        #stars-container, #petals-container, #heart-container {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none !important;
+            pointer-events: none !important; 
         }
+        
         #stars-container { z-index: 1; }
         #petals-container { z-index: 2; overflow: hidden; }
+        #heart-container { z-index: 15; }
 
         .star {
             position: absolute;
@@ -112,7 +103,6 @@
             100% { transform: translate3d(var(--x-end), 110vh, 0) rotateX(var(--rx)) rotateY(var(--ry)) rotateZ(var(--rz)); }
         }
 
-        /* Interaction Sparkles */
         .tap-sparkle {
             position: fixed;
             pointer-events: none !important;
@@ -126,7 +116,30 @@
             100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.5) rotate(90deg); opacity: 0; }
         }
 
-        /* Elements */
+        .shake { animation: shake-anim 0.4s ease-in-out; }
+        @keyframes shake-anim {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+        
+        .pulse-slow { animation: pulse-slow-anim 2.5s infinite ease-in-out alternate; }
+        @keyframes pulse-slow-anim {
+            0% { opacity: 0.4; } 100% { opacity: 1; text-shadow: 0 0 10px rgba(212,175,55,0.5); }
+        }
+
+        #lock-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 100;
+        }
+        
         .elegant-input {
             width: 100%;
             box-sizing: border-box;
@@ -150,7 +163,7 @@
             width: 100%;
             box-sizing: border-box;
             background: linear-gradient(90deg, #aa8c2c, #d4af37, #aa8c2c);
-            color: #0b001a;
+            color: #0a0514;
             border: none;
             border-radius: 30px;
             padding: 18px 24px;
@@ -164,11 +177,10 @@
             transition: opacity 0.3s, transform 0.2s;
             touch-action: manipulation;
             -webkit-appearance: none;
-            z-index: 101;
+            z-index: 101; 
         }
         .elegant-button:active { transform: scale(0.96); opacity: 0.9; }
 
-        /* Envelope */
         .envelope-wrapper {
             position: relative; 
             width: 90vw; max-width: 320px; height: 220px;
@@ -185,15 +197,16 @@
         .envelope-wrapper.is-open .wax-seal { opacity: 0; transition: opacity 0.1s; }
         .envelope-wrapper.is-open .env-card-preview { transform: translateY(-100px); }
 
-        /* Parchment */
         .parchment {
             background: linear-gradient(135deg, rgba(253,246,227,0.95), rgba(245,235,210,0.95));
             border: 1px solid rgba(212,175,55,0.4);
             box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 0 40px rgba(212,175,55,0.1);
             color: #2a0813;
+            -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+            touch-action: pan-y; /* Разрешаем только вертикальный скролл */
+            padding-bottom: calc(2rem + env(safe-area-inset-bottom)); /* Учитываем нижнюю полоску iPhone */
         }
         
-        /* Scratch Card */
         .scratch-wrapper {
             position: relative; width: 90%; max-width: 320px; height: 160px;
             margin: 0 auto; border-radius: 12px; overflow: hidden;
@@ -205,50 +218,60 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 2; 
             touch-action: none;
+            cursor: crosshair;
         }
         .scratch-content {
             position: absolute; inset: 0; z-index: 1;
             display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center;
         }
 
-        /* Animations */
-        .pulse-slow { animation: pulse-slow-anim 2.5s infinite ease-in-out alternate; }
-        @keyframes pulse-slow-anim {
-            0% { opacity: 0.4; } 100% { opacity: 1; text-shadow: 0 0 10px rgba(212,175,55,0.5); }
+        .heart-text {
+            position: absolute;
+            font-family: 'Playfair Display', serif; 
+            font-weight: 600;
+            white-space: nowrap;
+            text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.9);
+            animation: breath 3s infinite alternate ease-in-out;
+            z-index: 10;
+            pointer-events: none;
         }
         
-        .shake { animation: shake-anim 0.4s ease-in-out; }
-        @keyframes shake-anim {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-10px); }
-            40%, 80% { transform: translateX(10px); }
+        @keyframes breath {
+            0% { filter: brightness(0.85); transform: translate(-50%, -50%) scale(0.95); }
+            100% { filter: brightness(1.25); transform: translate(-50%, -50%) scale(1.05); text-shadow: 0 0 6px currentColor, 0px 1px 3px rgba(0,0,0,0.9); }
         }
 
-        .heart-glow {
-            filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.8));
-            animation: heartbeat 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-        }
-
-        /* Smooth fade transition for the finale */
-        .fade-transition {
-            transition: opacity 1.5s ease, transform 1.5s ease;
+        .heart-center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(32px, 8vw, 48px); /* Адаптивный размер шрифта */
+            color: #ffcccc; 
+            text-shadow: 0 0 15px rgba(255, 0, 0, 1), 0 0 35px rgba(200, 0, 0, 0.9), 2px 2px 5px rgba(0,0,0,1);
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 2.5s ease-out, transform 2.5s ease-out;
+            white-space: nowrap;
+            pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.8);
         }
     </style>
 </head>
 <body>
 
+    <!-- Ambient Backgrounds -->
     <div id="stars-container"></div>
     <div id="petals-container"></div>
+    <div id="heart-container" class="screen-hidden"></div>
 
     <!-- Screen 1: Lock Screen -->
     <div id="screen-lock" class="screen screen-active z-50">
-        <div id="lock-form" class="px-6 w-full max-w-sm flex flex-col items-center">
-            <div class="mb-8 opacity-90 drop-shadow-lg text-gold-main">
-                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <div class="absolute inset-0 bg-sky-dark/40 backdrop-blur-sm z-0 pointer-events-none"></div>
+        
+        <div id="lock-form" class="px-6 w-full">
+            <div class="mb-8 opacity-90 drop-shadow-lg text-gold-main flex justify-center">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
@@ -264,11 +287,13 @@
                 inputmode="text"
             >
             
-            <button id="btn-unlock" class="elegant-button">
+            <button 
+                id="btn-unlock" 
+                class="elegant-button">
                 Deblochează
             </button>
             
-            <div class="mt-8 text-center text-gold-light/70 font-serif text-[13px] tracking-wide leading-relaxed drop-shadow-md w-full">
+            <div class="mt-8 text-center text-gold-light/70 font-serif text-[13px] tracking-wide leading-relaxed drop-shadow-md px-2">
                 <span class="block text-gold-main italic mb-1 text-sm">Indiciu:</span> 
                 Cel mai frumos nume de fată din lume.
             </div>
@@ -277,7 +302,7 @@
 
     <!-- Screen 2: Envelope -->
     <div id="screen-envelope" class="screen screen-hidden z-40">
-        <div class="text-center mb-10 px-6 mt-[-10vh]">
+        <div class="text-center mb-10 px-6 mt-[-5vh]">
             <h1 class="text-4xl md:text-5xl text-gold-main font-cursive tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Pentru cea mai frumoasă...</h1>
         </div>
 
@@ -291,21 +316,20 @@
             </div>
         </div>
         
-        <p class="mt-12 text-gold-light/70 font-serif text-[10px] md:text-xs tracking-[0.25em] uppercase pulse-slow pointer-events-none">
+        <p class="mt-12 text-gold-light/70 font-serif text-[10px] md:text-xs tracking-[0.25em] uppercase pulse-slow">
             Atinge sigiliul pentru a deschide
         </p>
     </div>
 
     <!-- Screen 3: The Letter -->
     <div id="screen-letter" class="screen screen-hidden z-30">
-        <div id="poem-tap-area" class="absolute inset-0 z-0"></div>
         
-        <div class="parchment w-[90%] md:max-w-[420px] max-h-[85vh] rounded-xl p-6 md:p-8 flex flex-col items-center relative z-10 overflow-y-auto">
+        <div id="parchment-container" class="parchment w-[92%] md:max-w-[420px] h-[82vh] max-h-[700px] rounded-xl p-5 md:p-8 flex flex-col items-center relative z-10 overflow-y-auto">
             
             <div class="absolute top-4 left-4 text-gold-main/40"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h4v4H4zM4 16h4v4H4zM16 4h4v4h-4zM16 16h4v4h-4z"/></svg></div>
             <div class="absolute top-4 right-4 text-gold-main/40"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h4v4H4zM4 16h4v4H4zM16 4h4v4h-4zM16 16h4v4h-4z"/></svg></div>
             
-            <h2 class="font-serif italic text-xl md:text-2xl text-rose-deep mb-6 border-b border-gold-main/30 pb-4 text-center w-full">
+            <h2 class="font-serif italic text-xl md:text-2xl text-rose-deep mb-4 border-b border-gold-main/30 pb-3 text-center w-full mt-2">
                 Pentru cea mai frumoasă fată,
             </h2>
             
@@ -313,71 +337,75 @@
                 (Atinge ecranul pentru a citi...)
             </p>
 
-            <div id="poem-container" class="w-full flex flex-col gap-4 md:gap-6 text-center font-cursive text-2xl md:text-3xl leading-relaxed text-rose-deep drop-shadow-sm px-1 mb-8">
-                <!-- PLACEHOLDERS FOR YOUR POEM -->
-                <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none">
-                    [Aici vei scrie primul vers al poeziei tale,]
+            <div id="poem-container" class="w-full flex flex-col gap-4 text-center font-cursive text-[18px] md:text-xl leading-relaxed text-rose-deep drop-shadow-sm px-1 mb-8">
+                <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none text-2xl">
+                    Dragă Ariadna,
                 </p>
                 <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none">
-                    [Aici vine al doilea vers, plin de emoție,]
+                    Cred că aș începe prin a spune că nu m-aș fi gândit vreodată că o să cunosc o persoană cu un nume atât de frumos. Îmi place mult să-l pronunț, parcă ar fi o melodie!
                 </p>
                 <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none">
-                    [Al treilea vers, direct din suflet,]
+                    Acum vreau să-ți spun ceva ce ai mai auzit, însă eu nu mă pot abține! Ești extraordinară și extrem de frumoasă și chiar cred în teoria că tu sclipești mai tare decât stelele de pe cer și că, cu siguranță, nu ai concurență!
                 </p>
                 <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none">
-                    [Și ultimul vers, perfect pentru ea.]
+                    Ai niște ochi fabuloși, plini de sclipire! Tu însăți arăți splendid și meriți tot ce este mai bun!
+                </p>
+                <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none">
+                    Totul este trecător în viața asta și sunt sigur că fiecare problemă de-a ta se va rezolva. Iar eu vreau să-ți ofer umărul meu, pentru că, în doi, totul este cu siguranță mult mai ușor!
+                </p>
+                <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none">
+                    Sigur vom ajunge să scriem și cartea, și vorbesc serios când spun că eu chiar o voi scrie!
+                </p>
+                <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none text-[16px] md:text-[19px] italic text-rose-red mt-2">
+                    „În ciuda la toate, nu te opri să dai din coate,<br>
+                    Visele mari nu iubesc să privească în spate.<br>
+                    Cel ce se bate cu pumnul în piept nu răzbate,<br>
+                    Șansele date le pierzi dacă nu-s preluate.”
+                </p>
+                <p class="poem-line opacity-0 transition-opacity duration-1000 ease-in-out transform translate-y-2 pointer-events-none text-2xl mt-2">
+                    ❤️
                 </p>
             </div>
 
             <button 
                 id="btn-secret"
-                class="opacity-0 pointer-events-none transition-all duration-1000 ease-in mt-auto px-6 py-3 bg-rose-deep text-gold-light rounded-full font-serif text-[12px] md:text-sm tracking-wider shadow-lg border border-gold-main/50 hover:bg-rose-red z-20 touch-manipulation">
+                class="opacity-0 pointer-events-none transition-all duration-1000 ease-in mt-auto px-6 py-3 bg-rose-deep text-gold-light rounded-full font-serif text-[12px] md:text-sm tracking-wider shadow-lg border border-gold-main/50 hover:bg-rose-red z-20 touch-manipulation mb-2">
                 Mai am un secret pentru tine...
             </button>
         </div>
     </div>
 
-    <!-- Screen 4: The Secret Scratch-off & Minimalist Finale -->
-    <div id="screen-secret" class="screen screen-hidden z-20 overflow-hidden">
-        
-        <!-- The container that will fade out -->
-        <div id="scratch-ui-wrapper" class="flex flex-col items-center justify-center w-full fade-transition opacity-100 transform scale-100 z-30">
-            <div class="text-center mb-6 px-4">
-                <div class="text-gold-main mb-4 flex justify-center">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg>
-                </div>
-                <p class="font-serif text-[12px] md:text-sm text-gold-light/80 tracking-[0.2em] uppercase pulse-slow">Șterge cu degetul...</p>
-            </div>
-
-            <div class="scratch-wrapper">
-                <div class="scratch-content">
-                    <span class="font-cursive text-2xl md:text-3xl text-rose-deep leading-tight px-2 drop-shadow-sm">
-                        P.S. Arăți absolut superb în seara asta. ✨
-                    </span>
-                </div>
-                <canvas id="scratch-canvas"></canvas>
-            </div>
-        </div>
-
-        <!-- The Minimalist Heart Finale (Hidden initially) -->
-        <div id="final-heart-wrapper" class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none fade-transition opacity-0 transform scale-90">
-            <div class="text-gold-main heart-glow">
-                <!-- Large, elegant heart icon -->
-                <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor">
+    <!-- Screen 4: The Secret Scratch-off -->
+    <div id="screen-secret" class="screen screen-hidden z-20">
+        <div class="text-center mb-6 px-4">
+            <div class="text-gold-main mb-4 flex justify-center">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                 </svg>
             </div>
+            <p id="scratch-hint" class="font-serif text-[12px] md:text-sm text-gold-light/80 tracking-[0.2em] uppercase pulse-slow transition-opacity duration-500">Șterge cu degetul...</p>
         </div>
 
+        <div class="scratch-wrapper">
+            <div class="scratch-content">
+                <span class="font-cursive text-2xl md:text-3xl text-rose-deep leading-tight px-2 drop-shadow-sm">
+                    P.S. Chiar și acum arăți absolut superb. ✨
+                </span>
+            </div>
+            <canvas id="scratch-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Screen 5: The Final Heart -->
+    <div id="screen-heart" class="screen screen-hidden z-10">
+        <div class="absolute inset-0 bg-black/85 backdrop-blur-md z-0 pointer-events-none transition-opacity duration-2000" id="heart-bg"></div>
     </div>
 
     <script>
-        // --- Ambient Backgrounds (Stars & Petals) ---
+        // 1. Stars
         function initStars() {
             const container = document.getElementById('stars-container');
-            const count = Math.floor(window.innerWidth / 10); 
+            const count = Math.floor(window.innerWidth / 12); 
             for(let i = 0; i < count; i++) {
                 const star = document.createElement('div');
                 star.classList.add('star');
@@ -385,21 +413,23 @@
                 star.style.height = star.style.width;
                 star.style.left = `${Math.random() * 100}%`;
                 star.style.top = `${Math.random() * 100}%`;
-                star.style.animationDuration = `${Math.random() * 4 + 2}s`;
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
                 star.style.animationDelay = `${Math.random() * 5}s`;
                 container.appendChild(star);
             }
         }
 
+        // 2. Rose Petals
         const petalSVG = `
-            <svg viewBox="0 0 24 24" fill="#5c0a18" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 24 24" fill="#7a1023" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12,2C8,2,4,6,4,12c0,4.5,3.5,8,8,10c4.5-2,8-5.5,8-10C20,6,16,2,12,2z" opacity="0.9"/>
-                <path d="M12,4c-3,0-5.5,2.5-6.5,6c1.5-2,4-3,6.5-3s5,1,6.5,3C17.5,6.5,15,4,12,4z" fill="#3d0714" opacity="0.7"/>
+                <path d="M12,4c-3,0-5.5,2.5-6.5,6c1.5-2,4-3,6.5-3s5,1,6.5,3C17.5,6.5,15,4,12,4z" fill="#9e1832" opacity="0.7"/>
             </svg>
         `;
 
         function spawnPetal() {
             const container = document.getElementById('petals-container');
+            if(!container) return;
             const petal = document.createElement('div');
             petal.classList.add('petal');
             
@@ -424,33 +454,36 @@
             petal.innerHTML = petalSVG;
             container.appendChild(petal);
 
-            setTimeout(() => petal.remove(), duration * 1000);
+            setTimeout(() => { if(petal.parentNode) petal.remove(); }, duration * 1000);
         }
 
+        let petalInterval;
         function startPetalRain() {
-            for(let i=0; i<5; i++) setTimeout(spawnPetal, Math.random() * 3000);
-            setInterval(spawnPetal, 1500);
+            for(let i=0; i<15; i++) setTimeout(spawnPetal, Math.random() * 3000);
+            petalInterval = setInterval(spawnPetal, 600);
+        }
+        function stopPetalRain() {
+            clearInterval(petalInterval);
         }
 
-        // --- Global Tap Sparkles ---
+        // Global Tap Sparkles
         document.addEventListener('pointerdown', (e) => {
-            // Avoid blocking crucial interactive elements
-            if (e.target.closest('button, input, canvas, .envelope-wrapper, .env-card-preview, .env-top-flap')) return;
+            if (e.target.closest('button, input, canvas, .envelope-wrapper, #btn-unlock')) return;
 
-            for(let i=0; i<4; i++) {
+            for(let i=0; i<3; i++) {
                 const sparkle = document.createElement('div');
                 sparkle.classList.add('tap-sparkle');
                 
                 const isHeart = Math.random() > 0.5;
                 sparkle.innerHTML = isHeart 
-                    ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="#d4af37"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`
-                    : `<span style="color:#fbf0c9; font-size:14px; filter:drop-shadow(0 0 3px #d4af37);">✨</span>`;
+                    ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="#d4af37"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`
+                    : `<span style="color:#fbf0c9; font-size:12px; filter:drop-shadow(0 0 2px #d4af37);">✨</span>`;
                 
                 sparkle.style.left = `${e.clientX}px`;
                 sparkle.style.top = `${e.clientY}px`;
                 
                 const angle = Math.random() * Math.PI * 2;
-                const distance = Math.random() * 40 + 15;
+                const distance = Math.random() * 35 + 15;
                 sparkle.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
                 sparkle.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
                 
@@ -459,12 +492,12 @@
             }
         });
 
-        // --- Screen Navigation Logic ---
         const screens = {
             'screen-lock': document.getElementById('screen-lock'),
             'screen-envelope': document.getElementById('screen-envelope'),
             'screen-letter': document.getElementById('screen-letter'),
-            'screen-secret': document.getElementById('screen-secret')
+            'screen-secret': document.getElementById('screen-secret'),
+            'screen-heart': document.getElementById('screen-heart')
         };
 
         function switchScreen(fromId, toId) {
@@ -476,12 +509,12 @@
             }, 1000);
         }
 
-        // --- STREAMING_CHUNK:Password Screen Logic... ---
         const unlockBtn = document.getElementById('btn-unlock');
         const passInput = document.getElementById('password-input');
         
         function handleUnlock(e) {
-            if (e && e.type !== 'keypress') e.preventDefault();
+            if (e) e.preventDefault(); 
+            
             const val = passInput.value.trim().toLowerCase();
             if (val === 'ariadna') {
                 passInput.blur();
@@ -489,113 +522,152 @@
             } else {
                 const form = document.getElementById('lock-form');
                 form.classList.remove('shake');
-                void form.offsetWidth; // trigger reflow
+                void form.offsetWidth;
                 form.classList.add('shake');
             }
         }
         
-        // Touch events for robust mobile handling
-        unlockBtn.addEventListener('touchend', handleUnlock);
+        unlockBtn.addEventListener('touchend', (e) => {
+            e.preventDefault(); 
+            handleUnlock(e);
+        });
         unlockBtn.addEventListener('click', handleUnlock);
-        passInput.addEventListener('keypress', (e) => { 
-            if (e.key === 'Enter') { 
-                e.preventDefault(); 
-                handleUnlock(e); 
-            } 
+        
+        passInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleUnlock(e);
+            }
         });
 
-        // --- STREAMING_CHUNK:Envelope & Letter Logic... ---
         const envelopeEl = document.getElementById('envelope');
         let envelopeOpened = false;
         
-        function openEnvelope(e) {
-            if (e) e.preventDefault();
+        envelopeEl.addEventListener('click', () => {
             if (envelopeOpened) return;
             envelopeOpened = true;
             envelopeEl.classList.add('is-open');
-            setTimeout(() => switchScreen('screen-envelope', 'screen-letter'), 1500);
-        }
-        
-        envelopeEl.addEventListener('touchend', openEnvelope);
-        envelopeEl.addEventListener('click', openEnvelope);
+            setTimeout(() => {
+                switchScreen('screen-envelope', 'screen-letter');
+            }, 1500);
+        });
 
-        // Letter Screen (Poem)
         const poemLines = document.querySelectorAll('.poem-line');
         const btnSecret = document.getElementById('btn-secret');
         const poemHint = document.getElementById('poem-hint');
+        const parchmentContainer = document.getElementById('parchment-container');
         let currentLine = 0;
 
-        document.getElementById('poem-tap-area').addEventListener('pointerdown', (e) => {
-            if (currentLine === 0) poemHint.style.opacity = '0';
-            
+        // Отличаем прокрутку от клика для мобильных
+        let touchStartY = 0;
+        let isScrolling = false;
+
+        document.getElementById('screen-letter').addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+            isScrolling = false;
+        }, { passive: true });
+
+        document.getElementById('screen-letter').addEventListener('touchmove', (e) => {
+            if (Math.abs(e.touches[0].clientY - touchStartY) > 10) {
+                isScrolling = true;
+            }
+        }, { passive: true });
+
+        document.getElementById('screen-letter').addEventListener('touchend', (e) => {
+            if (e.target.closest('#btn-secret') || isScrolling) return;
+            revealNextLine();
+        });
+
+        // Резервный вариант для ПК
+        document.getElementById('screen-letter').addEventListener('mousedown', (e) => {
+            if (e.target.closest('#btn-secret')) return;
+            revealNextLine();
+        });
+
+        function revealNextLine() {
+            if (currentLine === 0) {
+                poemHint.style.opacity = '0';
+            }
             if (currentLine < poemLines.length) {
                 poemLines[currentLine].classList.remove('opacity-0', 'translate-y-2');
                 poemLines[currentLine].classList.add('opacity-100', 'translate-y-0');
+                
+                // Плавная прокрутка вниз внутри контейнера письма
+                setTimeout(() => {
+                    parchmentContainer.scrollTo({
+                        top: parchmentContainer.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }, 150);
+
                 currentLine++;
                 
                 if (currentLine === poemLines.length) {
                     setTimeout(() => {
                         btnSecret.classList.remove('opacity-0', 'pointer-events-none');
                         btnSecret.classList.add('opacity-100', 'pointer-events-auto');
+                        setTimeout(() => {
+                            parchmentContainer.scrollTo({
+                                top: parchmentContainer.scrollHeight,
+                                behavior: 'smooth'
+                            });
+                        }, 100);
                     }, 800);
                 }
             }
-        });
+        }
 
-        function goSecret(e) {
-            if(e) e.preventDefault();
+        btnSecret.addEventListener('click', () => {
             switchScreen('screen-letter', 'screen-secret');
             setTimeout(initScratchCard, 1200);
-        }
-        btnSecret.addEventListener('touchend', goSecret);
-        btnSecret.addEventListener('click', goSecret);
+        });
 
-        // --- STREAMING_CHUNK:Scratch Card and Minimalist Finale Logic... ---
+        let isScratchFinished = false;
+
         function initScratchCard() {
             const container = document.querySelector('.scratch-wrapper');
             const canvas = document.getElementById('scratch-canvas');
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             
             const rect = container.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
+            // Делаем разрешение Canvas больше для четкости на мобильных экранах (Retina)
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
             
-            // Draw Gold Layer
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            const gradient = ctx.createLinearGradient(0, 0, rect.width, rect.height);
             gradient.addColorStop(0, '#aa8c2c');
             gradient.addColorStop(0.5, '#fbf0c9');
             gradient.addColorStop(1, '#d4af37');
             ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, rect.width, rect.height);
             
-            // Texture
             for (let i = 0; i < 400; i++) {
                 ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.1)';
-                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 1, 1);
+                ctx.fillRect(Math.random() * rect.width, Math.random() * rect.height, 1, 1);
             }
 
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
-            ctx.lineWidth = 45; 
+            ctx.lineWidth = 40; 
             ctx.globalCompositeOperation = 'destination-out';
 
             let isDrawing = false;
-            let finaleTriggered = false;
-            let moveCount = 0;
+            const totalPixels = canvas.width * canvas.height;
 
             function getCoords(e) {
                 const rect = canvas.getBoundingClientRect();
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
                 return { 
-                    x: (clientX - rect.left) * scaleX, 
-                    y: (clientY - rect.top) * scaleY 
+                    x: clientX - rect.left, 
+                    y: clientY - rect.top 
                 };
             }
 
             function startDraw(e) {
+                if(isScratchFinished) return;
                 isDrawing = true;
                 const c = getCoords(e);
                 ctx.beginPath();
@@ -603,74 +675,121 @@
             }
 
             function scratch(e) {
-                if (!isDrawing) return;
-                if (e.cancelable) e.preventDefault(); // crucial for telegram webview to stop scrolling
-                
+                if (!isDrawing || isScratchFinished) return;
+                if (e.cancelable) e.preventDefault(); 
                 const coords = getCoords(e);
                 ctx.lineTo(coords.x, coords.y);
                 ctx.stroke();
+            }
 
-                // Throttle the check to save performance
-                moveCount++;
-                if (moveCount % 5 === 0 && !finaleTriggered) {
-                    checkCompletion();
+            function stopDraw() {
+                if(!isDrawing || isScratchFinished) return;
+                isDrawing = false;
+                checkPercentage();
+            }
+
+            function checkPercentage() {
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                let cleared = 0;
+                // Проверяем альфа-канал каждого 4-го пикселя
+                for (let i = 3; i < imageData.length; i += 16) {
+                    if (imageData[i] === 0) cleared++;
+                }
+                const percent = (cleared / (imageData.length / 16)) * 100;
+                
+                if (percent > 60 && !isScratchFinished) { 
+                    isScratchFinished = true;
+                    document.getElementById('scratch-hint').style.opacity = '0';
+                    
+                    canvas.style.transition = 'opacity 1s ease';
+                    canvas.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        startFinalHeartSequence();
+                    }, 3500);
                 }
             }
 
-            function stopDraw() { 
-                isDrawing = false; 
-            }
-
-            function checkCompletion() {
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const pixels = imageData.data;
-                let transparentCount = 0;
-                
-                // Check alpha channel of pixels
-                for (let i = 3; i < pixels.length; i += 4) { 
-                    if (pixels[i] < 128) transparentCount++; 
-                }
-                
-                const percent = (transparentCount / (pixels.length / 4)) * 100;
-                
-                if (percent > 50) {
-                    finaleTriggered = true;
-                    // Wait 1.5 seconds so she can finish reading, then trigger finale
-                    setTimeout(triggerMinimalistFinale, 1500);
-                }
-            }
-
-            // Bind Events
             canvas.addEventListener('mousedown', startDraw);
             canvas.addEventListener('mousemove', scratch);
             window.addEventListener('mouseup', stopDraw);
-            // Touch Events (passive: false is required to preventDefault)
+
             canvas.addEventListener('touchstart', startDraw, { passive: false });
             canvas.addEventListener('touchmove', scratch, { passive: false });
             window.addEventListener('touchend', stopDraw);
             window.addEventListener('touchcancel', stopDraw);
         }
 
-        function triggerMinimalistFinale() {
-            const uiWrapper = document.getElementById('scratch-ui-wrapper');
-            const heartWrapper = document.getElementById('final-heart-wrapper');
+        function startFinalHeartSequence() {
+            switchScreen('screen-secret', 'screen-heart');
+            stopPetalRain(); 
             
-            // Fade out the scratch card and text
-            uiWrapper.classList.remove('opacity-100', 'scale-100');
-            uiWrapper.classList.add('opacity-0', 'scale-95');
-            uiWrapper.style.pointerEvents = 'none';
-
-            // Wait for fade out, then hide it completely and show the heart
             setTimeout(() => {
-                uiWrapper.style.display = 'none';
-                
-                heartWrapper.classList.remove('opacity-0', 'scale-90');
-                heartWrapper.classList.add('opacity-100', 'scale-100');
-                
-            }, 1500);
+                createTextHeart();
+            }, 1000);
         }
 
-        // --- Initialize on Load ---
+        function createTextHeart() {
+            const container = document.getElementById('screen-heart');
+            const phrase = "Ești de nedescrisă";
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2.2;
+            
+            // Идеальное масштабирование под мобильный экран (ширина)
+            const baseScale = window.innerWidth * 0.026; 
+
+            function createLayer(count, scaleMult, fontSize, color, delayBase) {
+                for (let i = 0; i < count; i++) {
+                    const t = (i / count) * Math.PI * 2;
+                    
+                    const xRaw = 16 * Math.pow(Math.sin(t), 3);
+                    const yRaw = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+
+                    const x = (xRaw * baseScale * scaleMult);
+                    const y = (yRaw * baseScale * scaleMult);
+
+                    const el = document.createElement('div');
+                    el.classList.add('heart-text');
+                    el.innerText = phrase;
+                    
+                    el.style.left = `${cx + x}px`;
+                    el.style.top = `${cy + y}px`;
+                    el.style.fontSize = `${fontSize}px`;
+                    el.style.color = color;
+                    
+                    el.style.animationDelay = `${Math.random() * -3}s`;
+                    
+                    el.style.opacity = '0';
+                    const revealDelay = Math.random() * 1.5 + delayBase;
+                    el.style.transition = `opacity 2s ease ${revealDelay}s, transform 2s ease ${revealDelay}s`;
+                    el.style.transform = `translate(-50%, -50%) scale(0.5)`;
+
+                    container.appendChild(el);
+                    
+                    setTimeout(() => { 
+                        el.style.opacity = '0.9'; 
+                        el.style.transform = `translate(-50%, -50%) scale(1)`;
+                    }, 50);
+                }
+            }
+
+            createLayer(100, 1.0, 9, '#ff3333', 0);    
+            createLayer(80, 0.82, 10, '#e60000', 0.5);  
+            createLayer(60, 0.63, 11, '#b30000', 1.0);  
+            createLayer(40, 0.42, 11, '#660000', 1.5);  
+
+            const centerEl = document.createElement('div');
+            centerEl.id = 'heart-center-text';
+            centerEl.classList.add('heart-center-text');
+            centerEl.innerText = phrase;
+            container.appendChild(centerEl);
+            
+            setTimeout(() => {
+                centerEl.style.opacity = '1';
+                centerEl.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 3000);
+        }
+
         window.onload = () => {
             initStars();
             startPetalRain();
